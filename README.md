@@ -7,8 +7,9 @@ Each experiment is self-contained and can be built and run independently.
 
 ## Experiments
 
-| Project | Description | Technologies |
-| --- | --- | --- |
+| Project | Category | Technologies |
+|---|:---|:---|
+| spring-boot-liquibase | database | Liquibase |
 
 
 
