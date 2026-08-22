@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: changelog/001_initial_product_schema.sql
+      relativeToChangelogFile: true

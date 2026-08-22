@@ -1,7 +1,7 @@
 databaseChangeLog:
   - include:
-      file: changelog/00000000000000_initial_schema.sql
+      file: module/authentication/changelog.yaml
       relativeToChangelogFile: true
   - include:
-      file: changelog/20170503041524_added_entity_Car.sql
+      file: module/product/changelog.yaml
       relativeToChangelogFile: true
