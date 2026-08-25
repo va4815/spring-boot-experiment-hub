@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset vincent:001
+--changeset vincent:auth-001
 CREATE SCHEMA IF NOT EXISTS schema_authentication;
 
 CREATE TABLE schema_authentication.role

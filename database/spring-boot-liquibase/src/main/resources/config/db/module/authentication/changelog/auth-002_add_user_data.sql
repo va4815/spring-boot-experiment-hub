@@ -1,6 +1,9 @@
 --liquibase formatted sql
 
---changeset vincent:002
+--changeset vincent:auth-002
+
+--pre-conditions-table-exists schema_authentication.role
+--pre-conditions-table-exists schema_authentication.user_account
 
 INSERT INTO schema_authentication.role (name)
 VALUES ('Admin');

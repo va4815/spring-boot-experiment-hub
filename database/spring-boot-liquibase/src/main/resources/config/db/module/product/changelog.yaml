@@ -1,7 +1,7 @@
 databaseChangeLog:
   - include:
-      file: changelog/001_initial_product_schema.sql
+      file: changelog/product-001_initial_product_schema.sql
       relativeToChangelogFile: true
   - include:
-      file: changelog/002_create_product.sql
+      file: changelog/product-002_create_product.sql
       relativeToChangelogFile: true
