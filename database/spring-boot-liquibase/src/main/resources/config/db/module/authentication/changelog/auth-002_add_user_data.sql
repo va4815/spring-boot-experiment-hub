@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset vincent:auth-002 context:auth-v2
+--changeset vincent:auth-002 context:authentication labels:auth-v2
 
 --preconditions onFail:HALT onError:HALT
 --precondition-table-exists schema:schema_authentication table:role

@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset vincent:product-002 context:product-v2
+--changeset vincent:product-002 context:product labels:product-v2
 
 CREATE TABLE schema_product.product
 (
