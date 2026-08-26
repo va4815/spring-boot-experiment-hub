@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset vincent:auth-002
+--changeset vincent:auth-002 context:auth-v2
 
 --preconditions onFail:HALT onError:HALT
 --precondition-table-exists schema:schema_authentication table:role
@@ -15,3 +15,6 @@ VALUES ('Admin');
 INSERT INTO schema_authentication.user_account (role_id, username)
     SELECT id, 'Dev Admin' FROM schema_authentication.role
 WHERE name = 'Admin';
+
+--rollback DELETE FROM schema_authentication.user_account WHERE username = 'Dev Admin';
+--rollback DELETE FROM schema_authentication.role WHERE name = 'Admin';

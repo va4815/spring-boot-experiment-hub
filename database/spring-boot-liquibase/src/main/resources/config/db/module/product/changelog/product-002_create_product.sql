@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset vincent:product-002
+--changeset vincent:product-002 context:product-v2
 
 CREATE TABLE schema_product.product
 (
@@ -14,3 +14,5 @@ CREATE TABLE schema_product.product
 
     CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES schema_product.category (id)
 );
+
+--rollback drop table schema_product.product;

@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset vincent:product-001
+--changeset vincent:product-001 context:product-v1
 CREATE SCHEMA IF NOT EXISTS schema_product;
 
 CREATE TABLE schema_product.category

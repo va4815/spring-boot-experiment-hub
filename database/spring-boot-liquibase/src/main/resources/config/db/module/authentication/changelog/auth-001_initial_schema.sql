@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset vincent:auth-001
+--changeset vincent:auth-001 context:auth-v1
 CREATE SCHEMA IF NOT EXISTS schema_authentication;
 
 CREATE TABLE schema_authentication.role
@@ -25,3 +25,6 @@ CREATE TABLE schema_authentication.user_account
 
     CONSTRAINT fk_user_account_role FOREIGN KEY (role_id) REFERENCES schema_authentication.role (id)
 );
+
+--rollback drop table schema_authentication.user_account cascade;
+--rollback drop table schema_authentication.role cascade;
