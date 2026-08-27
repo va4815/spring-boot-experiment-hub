@@ -13,12 +13,12 @@ public class FlywayConfiguration {
 
     @Bean(name = "authenticationFlyway", initMethod = "migrate")
     Flyway authenticationFlyway(DataSource dataSource) {
-        return createFlyway(dataSource, "authentication");
+        return createFlyway(dataSource, "schema_authentication");
     }
 
     @Bean(name = "productFlyway", initMethod = "migrate")
     Flyway productFlyway(DataSource dataSource) {
-        return createFlyway(dataSource, "product");
+        return createFlyway(dataSource, "schema_product");
     }
 
     private Flyway createFlyway(DataSource dataSource, String schema) {
