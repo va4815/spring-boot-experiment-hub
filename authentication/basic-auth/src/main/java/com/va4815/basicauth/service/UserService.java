@@ -1,5 +1,7 @@
 package com.va4815.basicauth.service;
 
+import com.va4815.basicauth.dto.UserDTO;
+import com.va4815.basicauth.entity.Role;
 import com.va4815.basicauth.entity.User;
 import com.va4815.basicauth.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -12,13 +14,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleService roleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
-    public User createUser(User user) {
+    public User createUser(UserDTO user) {
         String username = user.getUsername();
 
         if (userRepository.findByUsername(username).isPresent()) {
@@ -28,8 +32,17 @@ public class UserService {
             );
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        String roleCode = user.getRoleCode();
+
+        Role role = roleService.findByCode(roleCode);
+        
+        // create user
+        User newUser = new User();
+        newUser.setUsername(username);
+        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        newUser.setRole(role);
+
+        return userRepository.save(newUser);
     }
 
     public User getUserById(Long id) {
