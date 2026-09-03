@@ -1,7 +1,7 @@
 package com.va4815.basicauth.controller;
 
 import com.va4815.basicauth.entity.User;
-import com.va4815.basicauth.service.MyUserDetailService;
+import com.va4815.basicauth.config.authentication.MyUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

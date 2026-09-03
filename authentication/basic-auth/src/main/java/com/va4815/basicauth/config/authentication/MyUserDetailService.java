@@ -1,4 +1,4 @@
-package com.va4815.basicauth.service;
+package com.va4815.basicauth.config.authentication;
 
 import com.va4815.basicauth.entity.User;
 import com.va4815.basicauth.repository.UserRepository;
@@ -20,8 +20,10 @@ public class MyUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        return SecurityUser.from(user);
     }
 
     public User createuser(User user) {

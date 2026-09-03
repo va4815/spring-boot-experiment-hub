@@ -1,6 +1,6 @@
 package com.va4815.basicauth.config;
 
-import com.va4815.basicauth.service.MyUserDetailService;
+import com.va4815.basicauth.config.authentication.MyUserDetailService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
