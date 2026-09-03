@@ -3,7 +3,7 @@ package com.va4815.basicauth.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user_account")
 public class User {
 
     @Id
@@ -12,6 +12,10 @@ public class User {
 
     private String username;
     private String password;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     public Long getId() {
         return id;
