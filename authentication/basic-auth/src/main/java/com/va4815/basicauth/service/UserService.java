@@ -1,5 +1,6 @@
 package com.va4815.basicauth.service;
 
+import com.va4815.basicauth.dto.RoleDTO;
 import com.va4815.basicauth.dto.UserDTO;
 import com.va4815.basicauth.entity.Role;
 import com.va4815.basicauth.entity.User;
@@ -34,13 +35,13 @@ public class UserService {
 
         String roleCode = user.getRoleCode();
 
-        Role role = roleService.findByCode(roleCode);
+        RoleDTO roleDTO = roleService.findByCode(roleCode);
         
         // create user
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        newUser.setRole(role);
+        newUser.setRole(Role.toEntity(roleDTO));
 
         return userRepository.save(newUser);
     }
