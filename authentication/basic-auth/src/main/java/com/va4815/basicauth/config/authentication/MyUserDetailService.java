@@ -21,6 +21,6 @@ public class MyUserDetailService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return SecurityUser.from(user);
+        return AuthUserDetails.from(user);
     }
 }

@@ -8,21 +8,21 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-public record SecurityUser(
+public record AuthUserDetails(
         String username,
         String password,
         Collection<? extends GrantedAuthority> authorities
 ) implements UserDetails {
 
-    public SecurityUser {
+    public AuthUserDetails {
         authorities = List.copyOf(authorities);
     }
 
-    public static SecurityUser from(User user) {
-        return new SecurityUser(
+    public static AuthUserDetails from(User user) {
+        return new AuthUserDetails(
                 user.getUsername(),
                 user.getPassword(),
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                List.of(new SimpleGrantedAuthority(user.getRole().getCode()))
         );
     }
 
