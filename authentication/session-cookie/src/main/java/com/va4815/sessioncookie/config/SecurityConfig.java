@@ -39,7 +39,11 @@ public class SecurityConfig {
             logout.logoutUrl("/auth/logout")
             .invalidateHttpSession(true)
             .clearAuthentication(true)
-            .deleteCookies("JSESSIONID");
+            .deleteCookies("JSESSIONID")
+            .logoutSuccessHandler((request, response, authentication) -> {
+                response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            });
+
         })
         .exceptionHandling(ex -> {
             ex.authenticationEntryPoint((request, response, authException) -> {
