@@ -13,7 +13,7 @@ public record AuthUserDetails(
         String password,
         Collection<? extends GrantedAuthority> authorities
 ) implements UserDetails {
-    private static final String ROLE_PREFIX = "";
+    private static final String ROLE_PREFIX = "ROLE_";
 
     public AuthUserDetails {
         authorities = List.copyOf(authorities);

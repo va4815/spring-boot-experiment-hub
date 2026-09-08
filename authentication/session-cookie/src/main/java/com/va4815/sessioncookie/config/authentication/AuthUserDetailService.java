@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MyUserDetailService implements UserDetailsService {
+public class AuthUserDetailService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    public MyUserDetailService(UserRepository userRepository) {
+    public AuthUserDetailService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
