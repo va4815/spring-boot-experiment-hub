@@ -18,7 +18,7 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "User not found with username: " + username
+                        "Authenticated user no longer exists"
                 ));
     }
 
