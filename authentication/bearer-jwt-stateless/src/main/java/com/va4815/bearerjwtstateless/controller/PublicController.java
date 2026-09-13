@@ -1,4 +1,4 @@
-package com.va4815.bearerjwtstateless.config.authentication;
+package com.va4815.bearerjwtstateless.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
