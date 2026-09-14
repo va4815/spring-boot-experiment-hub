@@ -9,6 +9,18 @@ public class UserResponseDTO {
     private String token;
     private String roleCode;
 
+    public static UserResponseDTO fromUser(User user) {
+        UserResponseDTO userDTO = new UserResponseDTO();
+        userDTO.setId(user.getId());
+        userDTO.setUsername(user.getUsername());
+
+        if (user.getRole() != null) {
+            userDTO.setRoleCode(user.getRole().getCode());
+        }
+
+        return userDTO;
+    }
+
     public static UserResponseDTO fromUser(User user, String token) {
         UserResponseDTO userDTO = new UserResponseDTO();
         userDTO.setId(user.getId());
