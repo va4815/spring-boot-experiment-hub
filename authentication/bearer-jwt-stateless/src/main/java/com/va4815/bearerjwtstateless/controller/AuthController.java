@@ -8,6 +8,7 @@ import com.va4815.bearerjwtstateless.entity.Role;
 import com.va4815.bearerjwtstateless.entity.User;
 import com.va4815.bearerjwtstateless.repository.RoleRepository;
 import com.va4815.bearerjwtstateless.repository.UserRepository;
+import com.va4815.bearerjwtstateless.service.RoleService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,17 +28,18 @@ import java.util.Optional;
 public class AuthController {
 
     private AuthenticationManager authenticationManager;
+    private RoleService roleService;
+
     private UserRepository userRepository;
-    private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private JwtUtil jwtUtil;
 
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, RoleRepository roleRepository) {
+    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, RoleService roleService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.roleService = roleService;
     }
 
     @PostMapping("/login")
@@ -77,11 +79,8 @@ public class AuthController {
         user.setUsername(requestDTO.getUsername());
         user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
 
-        Optional<Role> roleOpt = roleRepository.findByCode(requestDTO.getRoleCode());
-        if (roleOpt.isEmpty()) {
-            throw new BadCredentialsException("Role not found");
-        }
-        user.setRole(roleOpt.get());
+        Role role = roleService.findByCode(requestDTO.getRoleCode());
+        user.setRole(role);
 
         user = userRepository.save(user);
 
