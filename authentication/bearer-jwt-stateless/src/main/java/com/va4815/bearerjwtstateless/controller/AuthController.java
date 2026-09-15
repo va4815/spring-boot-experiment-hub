@@ -4,11 +4,8 @@ import com.va4815.bearerjwtstateless.config.jwt.JwtUtil;
 import com.va4815.bearerjwtstateless.dto.AuthRequestDTO;
 import com.va4815.bearerjwtstateless.dto.CreateuserRequestDTO;
 import com.va4815.bearerjwtstateless.dto.UserResponseDTO;
-import com.va4815.bearerjwtstateless.entity.Role;
 import com.va4815.bearerjwtstateless.entity.User;
-import com.va4815.bearerjwtstateless.repository.RoleRepository;
-import com.va4815.bearerjwtstateless.repository.UserRepository;
-import com.va4815.bearerjwtstateless.service.RoleService;
+import com.va4815.bearerjwtstateless.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,25 +18,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private AuthenticationManager authenticationManager;
-    private RoleService roleService;
+    private UserService userService;
 
-    private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
     private JwtUtil jwtUtil;
 
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, RoleService roleService) {
+    public AuthController(AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, UserService userService) {
         this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
-        this.roleService = roleService;
+        this.userService = userService;
     }
 
     @PostMapping("/login")
@@ -63,7 +56,7 @@ public class AuthController {
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        User user = userRepository.findByUsername(requestDTO.username()).orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
+        User user = userService.findByUsername(requestDTO.username());
         String token = jwtUtil.generateToken(principal.getUsername());
 
         return UserResponseDTO.fromUser(user, token);
@@ -71,18 +64,11 @@ public class AuthController {
 
     @PostMapping("/signup")
     public UserResponseDTO signup(@RequestBody CreateuserRequestDTO requestDTO) throws BadCredentialsException {
-        if (userRepository.findByUsername(requestDTO.getUsername()).isPresent()) {
+        if (userService.existsByUsername(requestDTO.getUsername())) {
             throw new BadCredentialsException("Username already exists");
         }
 
-        User user = new User();
-        user.setUsername(requestDTO.getUsername());
-        user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
-
-        Role role = roleService.findByCode(requestDTO.getRoleCode());
-        user.setRole(role);
-
-        user = userRepository.save(user);
+        User user = userService.createUser(requestDTO);
 
         return UserResponseDTO.fromUser(user);
     }

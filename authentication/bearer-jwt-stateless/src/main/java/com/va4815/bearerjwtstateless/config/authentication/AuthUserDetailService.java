@@ -2,6 +2,7 @@ package com.va4815.bearerjwtstateless.config.authentication;
 
 import com.va4815.bearerjwtstateless.entity.User;
 import com.va4815.bearerjwtstateless.repository.UserRepository;
+import com.va4815.bearerjwtstateless.service.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,17 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthUserDetailService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public AuthUserDetailService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public AuthUserDetailService(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Invalid username or password"));
+        User user = userService.findByUsername(username);
 
         return AuthUserDetails.from(user);
     }
