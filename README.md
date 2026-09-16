@@ -7,9 +7,13 @@ Each experiment is self-contained and can be built and run independently.
 
 ## Experiments
 
-| Project | Category | Technologies |
-|---|:---|:---|
-| spring-boot-liquibase | database | Liquibase |
+| Project               | Category       | Technologies                             |
+|-----------------------|:---------------|:-----------------------------------------|
+| spring-boot-liquibase | database       | Liquibase                                |
+| spring-boot-flyway    | database       | Flyway                                   |
+| basic-auth            | authentication | Basic Authentication                     |
+| session-cookie        | authentication | Session-based Authentication with Cookie |
+| bearer-jwt-stateless  | authentication | Stateless Bearer Authentication with JWT |
 
 
 
