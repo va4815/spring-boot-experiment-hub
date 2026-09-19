@@ -5,7 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +20,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private static final String BEARER_ = "Bearer ";
 
     private final AuthUserCache authUserCache;
-    private AuthUserDetailService authUserDetailService;
+    private final AuthUserDetailService authUserDetailService;
 
     public AuthTokenFilter(AuthUserCache authUserCache, AuthUserDetailService authUserDetailService) {
         this.authUserCache = authUserCache;
@@ -30,28 +29,29 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            String token = parseToken(request);
+        String token = parseToken(request);
 
-            if (token == null) {
-                filterChain.doFilter(request, response);
-            }
-
-            Optional<User> userOpt = authUserCache.getUserByToken(token);
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-
-                UserDetails userDetails = authUserDetailService.loadUserByUsername(user.getUsername());
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                filterChain.doFilter(request, response);
-            }
-
-        } catch (Exception e) {
-            System.out.println("Cannot set user authentication " + e.getLocalizedMessage());
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            authenticate(token, request);
         }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private void authenticate(String token, HttpServletRequest request) {
+        Optional<User> user = authUserCache.getUserByToken(token);
+        if (user.isEmpty()) {
+            return;
+        }
+
+        UserDetails userDetails = authUserDetailService.loadUserByUsername(user.get().getUsername());
+        UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+        );
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     private String parseToken(HttpServletRequest request) {
