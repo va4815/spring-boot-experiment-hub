@@ -1,6 +1,6 @@
 package com.va4815.bearerjwtstateless.dto;
 
-public class CreateuserRequestDTO {
+public class CreateUserRequestDTO {
     private String username;
     private String password;
     private String roleCode;

@@ -1,6 +1,6 @@
 package com.va4815.bearerjwtstateless.service;
 
-import com.va4815.bearerjwtstateless.dto.CreateuserRequestDTO;
+import com.va4815.bearerjwtstateless.dto.CreateUserRequestDTO;
 import com.va4815.bearerjwtstateless.entity.Role;
 import com.va4815.bearerjwtstateless.entity.User;
 import com.va4815.bearerjwtstateless.repository.UserRepository;
@@ -41,7 +41,7 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    public User createUser(CreateuserRequestDTO requestDTO) {
+    public User createUser(CreateUserRequestDTO requestDTO) {
         User user = new User();
         user.setUsername(requestDTO.getUsername());
         user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));

@@ -2,7 +2,7 @@ package com.va4815.bearerjwtstateless.controller;
 
 import com.va4815.bearerjwtstateless.config.jwt.JwtUtil;
 import com.va4815.bearerjwtstateless.dto.AuthRequestDTO;
-import com.va4815.bearerjwtstateless.dto.CreateuserRequestDTO;
+import com.va4815.bearerjwtstateless.dto.CreateUserRequestDTO;
 import com.va4815.bearerjwtstateless.dto.UserResponseDTO;
 import com.va4815.bearerjwtstateless.entity.User;
 import com.va4815.bearerjwtstateless.service.UserService;
@@ -63,7 +63,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public UserResponseDTO signup(@RequestBody CreateuserRequestDTO requestDTO) throws BadCredentialsException {
+    public UserResponseDTO signup(@RequestBody CreateUserRequestDTO requestDTO) throws BadCredentialsException {
         if (userService.existsByUsername(requestDTO.getUsername())) {
             throw new BadCredentialsException("Username already exists");
         }
