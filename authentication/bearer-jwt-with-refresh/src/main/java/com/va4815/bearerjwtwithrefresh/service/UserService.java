@@ -42,6 +42,23 @@ public class UserService {
     }
 
     public User createUser(CreateUserRequestDTO requestDTO) {
+        if (requestDTO.getUsername() == null || requestDTO.getUsername().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+        if (existsByUsername(requestDTO.getUsername())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        if (requestDTO.getPassword() == null || requestDTO.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+        if (requestDTO.getRoleCode() == null || requestDTO.getRoleCode().isEmpty()) {
+            throw new IllegalArgumentException("Role code cannot be null or empty");
+        }
+        if (roleService.findByCode(requestDTO.getRoleCode()) == null) {
+            throw new IllegalArgumentException("Role code does not exist");
+        }
+
+
         User user = new User();
         user.setUsername(requestDTO.getUsername());
         user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
