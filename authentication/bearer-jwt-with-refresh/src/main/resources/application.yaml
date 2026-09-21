@@ -15,5 +15,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
+  secret: ${ACCESS_TOKEN_SECRET}
+  token:
+    access:
+      expiration: ${ACCESS_TOKEN_EXPIRATION}
+    refresh:
+      expiration: ${REFRESH_TOKEN_EXPIRATION}

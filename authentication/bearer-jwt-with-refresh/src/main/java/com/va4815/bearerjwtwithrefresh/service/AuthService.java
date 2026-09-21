@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -20,18 +21,22 @@ public class AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthService(AuthenticationManager authenticationManager,
                        UserService userService,
                        PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil
+                       JwtUtil jwtUtil,
+                       RefreshTokenService refreshTokenService
     ) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.refreshTokenService = refreshTokenService;
     }
 
+    @Transactional
     public TokenResponseDTO login(LoginRequestDTO requestDTO) {
 
         if (!StringUtils.hasText(requestDTO.username()) || !StringUtils.hasText(requestDTO.password())) {
@@ -50,9 +55,11 @@ public class AuthService {
         }
 
         User user = userService.findByUsername(requestDTO.username());
-        String token = jwtUtil.generateToken(principal.getUsername());
+        String accessToken = jwtUtil.generateToken(principal.getUsername());
+        String refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
 
-        return new TokenResponseDTO(token, user.getId());
+
+        return new TokenResponseDTO(accessToken, refreshToken, user.getId());
     }
 
 }
