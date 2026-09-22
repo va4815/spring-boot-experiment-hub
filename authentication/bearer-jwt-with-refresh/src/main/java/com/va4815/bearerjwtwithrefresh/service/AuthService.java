@@ -1,8 +1,7 @@
 package com.va4815.bearerjwtwithrefresh.service;
 
-import com.va4815.bearerjwtwithrefresh.config.jwt.JwtUtil;
-import com.va4815.bearerjwtwithrefresh.dto.LoginRequestDTO;
-import com.va4815.bearerjwtwithrefresh.dto.TokenResponseDTO;
+import com.va4815.bearerjwtwithrefresh.config.token.JwtUtil;
+import com.va4815.bearerjwtwithrefresh.dto.*;
 import com.va4815.bearerjwtwithrefresh.entity.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -56,10 +55,17 @@ public class AuthService {
 
         User user = userService.findByUsername(requestDTO.username());
         String accessToken = jwtUtil.generateToken(principal.getUsername());
-        String refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
-
+        String refreshToken = refreshTokenService.createRefreshToken(user);
 
         return new TokenResponseDTO(accessToken, refreshToken, user.getId());
+    }
+
+    @Transactional
+    public RefreshTokenResponseDTO refresh(RefreshTokenRequestDTO requestDTO) {
+        RotatedRefreshToken rotatedToken = refreshTokenService.rotateRefreshToken(requestDTO.refreshToken());
+        String accessToken = jwtUtil.generateToken(rotatedToken.user().getUsername());
+
+        return new RefreshTokenResponseDTO(accessToken, rotatedToken.rawToken());
     }
 
 }

@@ -1,11 +1,10 @@
 package com.va4815.bearerjwtwithrefresh.config.authentication;
 
-import com.va4815.bearerjwtwithrefresh.config.jwt.JwtUtil;
+import com.va4815.bearerjwtwithrefresh.config.token.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;

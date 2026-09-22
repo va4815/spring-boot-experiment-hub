@@ -1,4 +1,4 @@
-package com.va4815.bearerjwtwithrefresh.config.jwt;
+package com.va4815.bearerjwtwithrefresh.config.token;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

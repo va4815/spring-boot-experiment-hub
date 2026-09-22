@@ -1,13 +1,18 @@
 package com.va4815.bearerjwtwithrefresh.service;
 
+import com.va4815.bearerjwtwithrefresh.config.token.TokenCodec;
+import com.va4815.bearerjwtwithrefresh.dto.RotatedRefreshToken;
 import com.va4815.bearerjwtwithrefresh.entity.RefreshToken;
 import com.va4815.bearerjwtwithrefresh.entity.User;
+import com.va4815.bearerjwtwithrefresh.exception.InvalidRefreshTokenException;
 import com.va4815.bearerjwtwithrefresh.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class RefreshTokenService {
@@ -15,36 +20,59 @@ public class RefreshTokenService {
     private Long refreshTokenExpiration;
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserService userService;
+    private final TokenCodec tokenCodec;
 
-    public RefreshTokenService(RefreshTokenRepository refreshTokenRepository, UserService userService) {
+    public RefreshTokenService(RefreshTokenRepository refreshTokenRepository,
+                               TokenCodec tokenCodec) {
         this.refreshTokenRepository = refreshTokenRepository;
-        this.userService = userService;
+        this.tokenCodec = tokenCodec;
     }
 
-    public String createRefreshToken(String username) {
-        boolean existsUser = userService.existsByUsername(username);
-        if (!existsUser) {
-            throw new IllegalArgumentException("User does not exist");
-        }
-        User user = userService.findByUsername(username);
+    @Transactional
+    public String createRefreshToken(User user) {
+        return createRefreshToken(user, Instant.now());
+    }
 
-        RefreshToken refreshToken = refreshTokenRepository.findByUserId(user.getId()).orElse(null);
-        if (refreshToken == null) {
-            // new refresh token
-
-            refreshToken = new RefreshToken();
-            refreshToken.setUser(user);
-            refreshToken.setCreatedAt(LocalDateTime.now());
-            refreshToken.setExpiresAt(LocalDateTime.now().plusSeconds(refreshTokenExpiration));
-
-            // TODO: hash refresh token
-            refreshToken.setTokenHash(UUID.randomUUID().toString());
-
-            refreshToken = refreshTokenRepository.save(refreshToken);
+    @Transactional
+    public RotatedRefreshToken rotateRefreshToken(String rawToken) {
+        if (!StringUtils.hasText(rawToken)) {
+            throw new InvalidRefreshTokenException();
         }
 
-        return refreshToken.getTokenHash();
+        RefreshToken currentToken = refreshTokenRepository
+                .findByTokenHashForUpdate(tokenCodec.hash(rawToken))
+                .orElseThrow(InvalidRefreshTokenException::new);
+
+        Instant now = Instant.now();
+        if (currentToken.getRevokedAt() != null || !currentToken.getExpiresAt().isAfter(now)) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        currentToken.setLastUsedAt(now);
+        currentToken.setRevokedAt(now);
+
+        String replacementToken = createRefreshToken(currentToken.getUser(), now);
+        return new RotatedRefreshToken(currentToken.getUser(), replacementToken);
+    }
+
+    private String createRefreshToken(User user, Instant createdAt) {
+        String rawToken = tokenCodec.generateToken();
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUser(user);
+        refreshToken.setTokenHash(tokenCodec.hash(rawToken));
+        refreshToken.setCreatedAt(createdAt);
+        refreshToken.setExpiresAt(createdAt.plusSeconds(refreshTokenExpiration));
+
+        refreshTokenRepository.save(refreshToken);
+        return rawToken;
+    }
+
+    public Optional<RefreshToken> findByRawToken(String rawToken) {
+        if (!StringUtils.hasText(rawToken)) {
+            return Optional.empty();
+        }
+        return refreshTokenRepository.findByTokenHash(tokenCodec.hash(rawToken));
     }
 
 }
