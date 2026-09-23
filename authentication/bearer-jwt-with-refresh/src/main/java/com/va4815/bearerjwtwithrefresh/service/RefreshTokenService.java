@@ -75,4 +75,9 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByTokenHash(tokenCodec.hash(rawToken));
     }
 
+    public void deleteRefreshToken(RefreshToken refreshToken) {
+        byte[] tokenHash = refreshToken.getTokenHash();
+        refreshTokenRepository.deleteRefreshToken(tokenHash);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.va4815.bearerjwtwithrefresh.service;
 
 import com.va4815.bearerjwtwithrefresh.config.token.JwtUtil;
 import com.va4815.bearerjwtwithrefresh.dto.*;
+import com.va4815.bearerjwtwithrefresh.entity.RefreshToken;
 import com.va4815.bearerjwtwithrefresh.entity.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -66,6 +69,23 @@ public class AuthService {
         String accessToken = jwtUtil.generateToken(rotatedToken.user().getUsername());
 
         return new RefreshTokenResponseDTO(accessToken, rotatedToken.rawToken());
+    }
+
+    public void logout(RefreshTokenRequestDTO requestDTO) {
+        if (requestDTO.refreshToken() == null) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+
+        Optional<RefreshToken> refreshTokenOpt = refreshTokenService.findByRawToken(requestDTO.refreshToken());
+
+        if (refreshTokenOpt.isEmpty()) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+
+        RefreshToken refreshToken = refreshTokenOpt.get();
+
+        refreshTokenService.deleteRefreshToken(refreshToken);
+
     }
 
 }
