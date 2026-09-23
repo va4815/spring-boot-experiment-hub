@@ -14,6 +14,8 @@ import org.springframework.util.StringUtils;
 import java.time.Instant;
 import java.util.Optional;
 
+import static org.springframework.data.util.ClassUtils.ifPresent;
+
 @Service
 public class RefreshTokenService {
     @Value("${jwt.token.refresh.expiration}")
@@ -75,9 +77,10 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByTokenHash(tokenCodec.hash(rawToken));
     }
 
-    public void deleteRefreshToken(RefreshToken refreshToken) {
-        byte[] tokenHash = refreshToken.getTokenHash();
-        refreshTokenRepository.deleteRefreshToken(tokenHash);
+    @Transactional
+    public void deleteByRawToken(String rawToken) {
+        refreshTokenRepository.findByTokenHashForUpdate(tokenCodec.hash(rawToken))
+                        .ifPresent(refreshTokenRepository::delete);
     }
 
 }

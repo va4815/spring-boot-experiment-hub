@@ -72,20 +72,7 @@ public class AuthService {
     }
 
     public void logout(RefreshTokenRequestDTO requestDTO) {
-        if (requestDTO.refreshToken() == null) {
-            throw new BadCredentialsException("Invalid refresh token");
-        }
-
-        Optional<RefreshToken> refreshTokenOpt = refreshTokenService.findByRawToken(requestDTO.refreshToken());
-
-        if (refreshTokenOpt.isEmpty()) {
-            throw new BadCredentialsException("Invalid refresh token");
-        }
-
-        RefreshToken refreshToken = refreshTokenOpt.get();
-
-        refreshTokenService.deleteRefreshToken(refreshToken);
-
+        refreshTokenService.deleteByRawToken(requestDTO.refreshToken());
     }
 
 }
