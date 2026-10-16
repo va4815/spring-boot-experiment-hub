@@ -26,6 +26,10 @@ public class Menu {
     @JsonIgnore
     private Set<MenuItem> menuItems = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -77,6 +81,14 @@ public class Menu {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Restaurant getRestaurant() {
+        return restaurant;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
     }
 
     public Set<MenuItem> getMenuItems() {
