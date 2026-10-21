@@ -20,3 +20,8 @@ spring:
         jwt:
           issuer-uri: http://localhost:${KC_PORT}/realms/${KC_REALM}
 
+jwt:
+  auth:
+    converter:
+      principle-attribute: preferred_username
+      resource-id: spring-resource-backend
