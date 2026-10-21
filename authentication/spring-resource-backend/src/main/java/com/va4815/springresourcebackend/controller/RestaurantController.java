@@ -1,13 +1,14 @@
 package com.va4815.springresourcebackend.controller;
 
+import com.va4815.springresourcebackend.dto.request.CreateRestaurantRequestDTO;
 import com.va4815.springresourcebackend.dto.response.RestaurantResponseDTO;
 import com.va4815.springresourcebackend.entity.Restaurant;
+import com.va4815.springresourcebackend.model.CurrentUser;
 import com.va4815.springresourcebackend.service.RestaurantService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,6 +33,14 @@ public class RestaurantController {
 
         RestaurantResponseDTO response = new RestaurantResponseDTO(restaurant);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
+    public ResponseEntity<RestaurantResponseDTO> createRestaurant(@RequestBody CreateRestaurantRequestDTO requestDTO) {
+
+        Restaurant createdRestaurant = restaurantService.createRestaurant(requestDTO);
+        RestaurantResponseDTO response = new RestaurantResponseDTO(createdRestaurant);
         return ResponseEntity.ok(response);
     }
 
