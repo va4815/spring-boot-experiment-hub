@@ -3,11 +3,8 @@ package com.va4815.springresourcebackend.controller;
 import com.va4815.springresourcebackend.dto.request.CreateRestaurantRequestDTO;
 import com.va4815.springresourcebackend.dto.response.RestaurantResponseDTO;
 import com.va4815.springresourcebackend.entity.Restaurant;
-import com.va4815.springresourcebackend.model.CurrentUser;
 import com.va4815.springresourcebackend.service.RestaurantService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
