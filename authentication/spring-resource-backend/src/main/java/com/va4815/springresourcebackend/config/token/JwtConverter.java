@@ -29,8 +29,8 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
 
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter;
 
-    public JwtConverter(JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter) {
-        this.jwtGrantedAuthoritiesConverter = jwtGrantedAuthoritiesConverter;
+    public JwtConverter() {
+        this.jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
     }
 
     @Override
