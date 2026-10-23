@@ -2,12 +2,16 @@ package com.va4815.springresourcebackend.service;
 
 import com.va4815.springresourcebackend.dto.request.CreateMenuRequestDTO;
 import com.va4815.springresourcebackend.dto.request.MenuItemRequestDTO;
+import com.va4815.springresourcebackend.dto.request.UpdateMenuItemRequestDTO;
+import com.va4815.springresourcebackend.dto.response.MenuItemResponseDTO;
 import com.va4815.springresourcebackend.dto.response.MenuResponseDTO;
-import com.va4815.springresourcebackend.dto.response.RestaurantResponseDTO;
 import com.va4815.springresourcebackend.entity.Menu;
+import com.va4815.springresourcebackend.entity.MenuItem;
 import com.va4815.springresourcebackend.entity.Restaurant;
+import com.va4815.springresourcebackend.exception.GlobalArgumentException;
 import com.va4815.springresourcebackend.model.CurrentUser;
 import com.va4815.springresourcebackend.repository.MenuRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,11 +24,13 @@ public class MenuService {
     private final CurrentUser currentUser;
 
     private final RestaurantService restaurantService;
+    private final MenuItemService menuItemService;
 
-    public MenuService(MenuRepository menuRepository, CurrentUser currentUser, RestaurantService restaurantService) {
+    public MenuService(MenuRepository menuRepository, CurrentUser currentUser, RestaurantService restaurantService, MenuItemService menuItemService) {
         this.menuRepository = menuRepository;
         this.currentUser = currentUser;
         this.restaurantService = restaurantService;
+        this.menuItemService = menuItemService;
     }
 
     public MenuResponseDTO createMenu(CreateMenuRequestDTO requestDTO) {
@@ -51,6 +57,12 @@ public class MenuService {
         menu = menuRepository.save(menu);
 
         return MenuResponseDTO.from(menu);
+    }
+
+    public MenuItemResponseDTO updateMenuItem(Long menuId, Long itemId, UpdateMenuItemRequestDTO requestDTO) {
+        MenuItem updateMenuItem = menuItemService.updateMenuItem(menuId, itemId, requestDTO);
+
+        return MenuItemResponseDTO.from(updateMenuItem);
     }
 
 }
