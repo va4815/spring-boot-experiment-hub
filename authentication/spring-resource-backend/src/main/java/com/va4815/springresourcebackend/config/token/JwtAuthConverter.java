@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
     @Value("${jwt.auth.converter.principle-attribute}")
     private String principleAttribute;
@@ -29,7 +29,7 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
 
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter;
 
-    public JwtConverter() {
+    public JwtAuthConverter() {
         this.jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
     }
 
