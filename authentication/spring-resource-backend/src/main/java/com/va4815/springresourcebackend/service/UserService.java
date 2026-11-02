@@ -14,7 +14,6 @@ import jakarta.ws.rs.core.Response;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -33,7 +32,7 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+    private static final Logger Logger = LoggerFactory.getLogger(UserService.class);
 
     @Value("${KC_SERVER_URL}")
     private String kcServerUrl;
@@ -111,9 +110,73 @@ public class UserService {
             User savedUser = userRepository.saveAndFlush(user);
             return UserResponseDTO.fromUser(savedUser);
         } catch (DataAccessException ex) {
-            LOGGER.error("Database user creation failed for Keycloak user {}", keycloakUserId, ex);
+            Logger.error("Database user creation failed for Keycloak user {}", keycloakUserId, ex);
             // TODO: Call the /users/delete API with keycloakUserId to compensate for the Keycloak account creation.
             throw ex;
+        }
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new GlobalArgumentException(
+                HttpStatus.NOT_FOUND,
+                "User not found"
+        ));
+
+        String keycloakUserId = user.getKcId();
+        if (keycloakUserId == null || keycloakUserId.isBlank()) {
+            Logger.error("Database user {} does not have a Keycloak user identifier", id);
+            throw new GlobalArgumentException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "The user account cannot be deleted because its identity record is invalid"
+            );
+        }
+
+        deleteKeycloakUser(keycloakUserId);
+
+        try {
+            userRepository.delete(user);
+            userRepository.flush();
+        } catch (DataAccessException ex) {
+            Logger.error(
+                    "Database user {} could not be deleted after Keycloak user {} was deleted",
+                    id,
+                    keycloakUserId,
+                    ex
+            );
+            throw ex;
+        }
+    }
+
+    private void deleteKeycloakUser(String keycloakUserId) {
+        try {
+            keycloakAdminClient.realm(kcRealm).users().get(keycloakUserId).remove();
+        } catch (ProcessingException ex) {
+            Logger.error("Keycloak is unavailable while deleting user {}", keycloakUserId, ex);
+            throw new GlobalArgumentException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "The identity provider is temporarily unavailable"
+            );
+        } catch (WebApplicationException ex) {
+            int status = ex.getResponse() == null ? 0 : ex.getResponse().getStatus();
+            if (status == HttpStatus.NOT_FOUND.value()) {
+                Logger.warn(
+                        "Keycloak user {} was already absent; continuing local user deletion",
+                        keycloakUserId
+                );
+                return;
+            }
+
+            Logger.error(
+                    "Keycloak user deletion request for user {} failed with HTTP status {}",
+                    keycloakUserId,
+                    status,
+                    ex
+            );
+            throw new GlobalArgumentException(
+                    HttpStatus.BAD_GATEWAY,
+                    "The identity provider rejected the user deletion request"
+            );
         }
     }
 
@@ -144,7 +207,7 @@ public class UserService {
                         "An account with the supplied username or email already exists"
                 );
                 default -> {
-                    LOGGER.error("Keycloak user creation failed with HTTP status {}", response.getStatus());
+                    Logger.error("Keycloak user creation failed with HTTP status {}", response.getStatus());
                     throw new GlobalArgumentException(
                             HttpStatus.BAD_GATEWAY,
                             "The identity provider rejected the registration request"
@@ -152,14 +215,14 @@ public class UserService {
                 }
             }
         } catch (ProcessingException ex) {
-            LOGGER.error("Keycloak is unavailable while creating a user", ex);
+            Logger.error("Keycloak is unavailable while creating a user", ex);
             throw new GlobalArgumentException(
                     HttpStatus.SERVICE_UNAVAILABLE,
                     "The identity provider is temporarily unavailable"
             );
         } catch (WebApplicationException ex) {
             int status = ex.getResponse() == null ? 0 : ex.getResponse().getStatus();
-            LOGGER.error("Keycloak user creation request failed with HTTP status {}", status, ex);
+            Logger.error("Keycloak user creation request failed with HTTP status {}", status, ex);
             throw new GlobalArgumentException(
                     HttpStatus.BAD_GATEWAY,
                     "The identity provider rejected the registration request"
@@ -170,7 +233,7 @@ public class UserService {
     private String getCreatedKeycloakUserId(Response response) {
         URI location = response.getLocation();
         if (location == null || location.getPath() == null) {
-            LOGGER.error("Keycloak user creation response did not include a Location header");
+            Logger.error("Keycloak user creation response did not include a Location header");
             throw new GlobalArgumentException(
                     HttpStatus.BAD_GATEWAY,
                     "The identity provider returned an invalid registration response"
@@ -180,7 +243,7 @@ public class UserService {
         String path = location.getPath();
         String keycloakUserId = path.substring(path.lastIndexOf('/') + 1);
         if (keycloakUserId.isBlank()) {
-            LOGGER.error("Keycloak user creation response included an invalid Location header");
+            Logger.error("Keycloak user creation response included an invalid Location header");
             throw new GlobalArgumentException(
                     HttpStatus.BAD_GATEWAY,
                     "The identity provider returned an invalid registration response"

@@ -54,4 +54,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SHOP_ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
