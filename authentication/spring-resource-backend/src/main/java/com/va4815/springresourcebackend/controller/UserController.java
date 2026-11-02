@@ -3,6 +3,7 @@ package com.va4815.springresourcebackend.controller;
 import com.va4815.springresourcebackend.dto.request.UserLoginRequestDTO;
 import com.va4815.springresourcebackend.dto.request.UserRegisterRequestDTO;
 import com.va4815.springresourcebackend.dto.response.TokenResponseDTO;
+import com.va4815.springresourcebackend.dto.response.UserResponseDTO;
 import com.va4815.springresourcebackend.model.CurrentUser;
 import com.va4815.springresourcebackend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,10 +49,9 @@ public class UserController {
     })
     @PostMapping("/register")
     @PreAuthorize("hasRole('SHOP_ADMIN')")
-    public ResponseEntity<Void> register(@Valid @RequestBody UserRegisterRequestDTO requestDTO) {
-        userService.register(requestDTO);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRegisterRequestDTO requestDTO) {
+        UserResponseDTO userDTO = userService.register(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
 
 }
