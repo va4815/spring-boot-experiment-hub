@@ -2,6 +2,7 @@ package com.va4815.springresourcebackend.service;
 
 import com.va4815.springresourcebackend.dto.request.UserLoginRequestDTO;
 import com.va4815.springresourcebackend.dto.request.UserRegisterRequestDTO;
+import com.va4815.springresourcebackend.dto.request.UserUpdateRequestDTO;
 import com.va4815.springresourcebackend.dto.response.TokenResponseDTO;
 import com.va4815.springresourcebackend.dto.response.UserResponseDTO;
 import com.va4815.springresourcebackend.entity.User;
@@ -14,6 +15,7 @@ import jakarta.ws.rs.core.Response;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -113,6 +115,118 @@ public class UserService {
             Logger.error("Database user creation failed for Keycloak user {}", keycloakUserId, ex);
             // TODO: Call the /users/delete API with keycloakUserId to compensate for the Keycloak account creation.
             throw ex;
+        }
+    }
+
+    @Transactional
+    public UserResponseDTO update(Long id, UserUpdateRequestDTO requestDTO) {
+        if (requestDTO.getEmail() == null
+                && requestDTO.getFirstName() == null
+                && requestDTO.getLastName() == null) {
+            throw new GlobalArgumentException(
+                    HttpStatus.BAD_REQUEST,
+                    "At least one user field must be supplied"
+            );
+        }
+
+        User user = userRepository.findById(id).orElseThrow(() -> new GlobalArgumentException(
+                HttpStatus.NOT_FOUND,
+                "User not found"
+        ));
+
+        String keycloakUserId = user.getKcId();
+        if (keycloakUserId == null || keycloakUserId.isBlank()) {
+            Logger.error("Database user {} does not have a Keycloak user identifier", id);
+            throw new GlobalArgumentException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "The user account cannot be updated because its identity record is invalid"
+            );
+        }
+
+        updateKeycloakUser(keycloakUserId, requestDTO);
+
+        if (requestDTO.getEmail() != null) {
+            user.setEmail(requestDTO.getEmail());
+            user.setEmailVerified(false);
+        }
+        if (requestDTO.getFirstName() != null) {
+            user.setFirstName(requestDTO.getFirstName());
+        }
+        if (requestDTO.getLastName() != null) {
+            user.setLastName(requestDTO.getLastName());
+        }
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(currentUser.getUsername());
+
+        try {
+            User savedUser = userRepository.saveAndFlush(user);
+            return UserResponseDTO.fromUser(savedUser);
+        } catch (DataAccessException ex) {
+            Logger.error(
+                    "Database user {} could not be updated after Keycloak user {} was updated",
+                    id,
+                    keycloakUserId,
+                    ex
+            );
+            throw ex;
+        }
+    }
+
+    private void updateKeycloakUser(String keycloakUserId, UserUpdateRequestDTO requestDTO) {
+        try {
+            UserResource userResource = keycloakAdminClient.realm(kcRealm).users().get(keycloakUserId);
+            UserRepresentation keycloakUser = userResource.toRepresentation();
+            if (keycloakUser == null) {
+                Logger.error("Keycloak returned no representation for user {}", keycloakUserId);
+                throw new GlobalArgumentException(
+                        HttpStatus.BAD_GATEWAY,
+                        "The identity provider returned an invalid user response"
+                );
+            }
+
+            if (requestDTO.getEmail() != null) {
+                keycloakUser.setEmail(requestDTO.getEmail());
+                keycloakUser.setEmailVerified(false);
+            }
+            if (requestDTO.getFirstName() != null) {
+                keycloakUser.setFirstName(requestDTO.getFirstName());
+            }
+            if (requestDTO.getLastName() != null) {
+                keycloakUser.setLastName(requestDTO.getLastName());
+            }
+
+            userResource.update(keycloakUser);
+        } catch (ProcessingException ex) {
+            Logger.error("Keycloak is unavailable while updating user {}", keycloakUserId, ex);
+            throw new GlobalArgumentException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "The identity provider is temporarily unavailable"
+            );
+        } catch (WebApplicationException ex) {
+            int status = ex.getResponse() == null ? 0 : ex.getResponse().getStatus();
+            Logger.error(
+                    "Keycloak user update request for user {} failed with HTTP status {}",
+                    keycloakUserId,
+                    status,
+                    ex
+            );
+
+            if (status == HttpStatus.BAD_REQUEST.value()) {
+                throw new GlobalArgumentException(
+                        HttpStatus.BAD_REQUEST,
+                        "The updated user details do not satisfy the identity provider requirements"
+                );
+            }
+            if (status == HttpStatus.CONFLICT.value()) {
+                throw new GlobalArgumentException(
+                        HttpStatus.CONFLICT,
+                        "An account with the supplied email already exists"
+                );
+            }
+            throw new GlobalArgumentException(
+                    HttpStatus.BAD_GATEWAY,
+                    "The identity provider rejected the user update request"
+            );
         }
     }
 

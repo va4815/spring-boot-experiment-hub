@@ -7,6 +7,8 @@ public class UserResponseDTO {
     private String kcId;
     private String username;
     private String email;
+    private String firstName;
+    private String lastName;
     private Boolean enabled;
 
     public static UserResponseDTO fromUser(User user) {
@@ -15,6 +17,8 @@ public class UserResponseDTO {
         responseDTO.setKcId(user.getKcId());
         responseDTO.setUsername(user.getUsername());
         responseDTO.setEmail(user.getEmail());
+        responseDTO.setFirstName(user.getFirstName());
+        responseDTO.setLastName(user.getLastName());
         responseDTO.setEnabled(user.getEnabled());
         return responseDTO;
     }
@@ -49,6 +53,22 @@ public class UserResponseDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Boolean getEnabled() {

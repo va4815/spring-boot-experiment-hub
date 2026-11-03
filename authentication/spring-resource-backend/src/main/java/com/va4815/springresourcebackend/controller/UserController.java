@@ -2,6 +2,7 @@ package com.va4815.springresourcebackend.controller;
 
 import com.va4815.springresourcebackend.dto.request.UserLoginRequestDTO;
 import com.va4815.springresourcebackend.dto.request.UserRegisterRequestDTO;
+import com.va4815.springresourcebackend.dto.request.UserUpdateRequestDTO;
 import com.va4815.springresourcebackend.dto.response.TokenResponseDTO;
 import com.va4815.springresourcebackend.dto.response.UserResponseDTO;
 import com.va4815.springresourcebackend.model.CurrentUser;
@@ -52,6 +53,13 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRegisterRequestDTO requestDTO) {
         UserResponseDTO userDTO = userService.register(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SHOP_ADMIN')")
+    public ResponseEntity<UserResponseDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateRequestDTO requestDTO) {
+        UserResponseDTO userDTO = userService.update(id, requestDTO);
+        return ResponseEntity.ok().body(userDTO);
     }
 
     @DeleteMapping("/{id}")
