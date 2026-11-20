@@ -1,5 +1,6 @@
 package com.va4815.springresourcebackend.service;
 
+import com.va4815.springresourcebackend.dto.request.CreateRestaurantRequestDTO;
 import com.va4815.springresourcebackend.entity.Restaurant;
 import com.va4815.springresourcebackend.enumeration.RestaurantType;
 import com.va4815.springresourcebackend.model.CurrentUser;
@@ -7,6 +8,7 @@ import com.va4815.springresourcebackend.repository.RestaurantRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +18,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -106,6 +111,32 @@ class RestaurantServiceTest {
 
     @Test
     public void createRestaurant_shouldCreateSuccess() {
+        String username = "Tester";
+        CreateRestaurantRequestDTO request = new CreateRestaurantRequestDTO(
+                "New Restaurant",
+                RestaurantType.CAFE,
+                "New Location"
+        );
+        when(restaurantRepository.existsByName(request.name())).thenReturn(false);
+        when(currentUser.getUsername()).thenReturn(username);
+        when(restaurantRepository.save(any(Restaurant.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Restaurant createdRestaurant = restaurantService.createRestaurant(request);
+
+        ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
+        verify(restaurantRepository).existsByName(request.name());
+        verify(restaurantRepository).save(restaurantCaptor.capture());
+
+        Restaurant savedRestaurant = restaurantCaptor.getValue();
+        assertSame(savedRestaurant, createdRestaurant);
+        assertEquals(request.name(), savedRestaurant.getName());
+        assertEquals(request.restaurantType().name(), savedRestaurant.getRestaurantType());
+        assertEquals(request.location(), savedRestaurant.getLocation());
+        assertEquals(username, savedRestaurant.getCreatedBy());
+        assertEquals(username, savedRestaurant.getUpdatedBy());
+        assertNotNull(savedRestaurant.getCreatedAt());
+        assertNotNull(savedRestaurant.getUpdatedAt());
 
     }
 
