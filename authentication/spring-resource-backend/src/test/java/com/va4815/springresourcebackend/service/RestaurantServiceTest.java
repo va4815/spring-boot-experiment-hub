@@ -12,6 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RestaurantServiceTest {
@@ -54,7 +59,13 @@ class RestaurantServiceTest {
 
     @Test
     public void getAllRestaurants_shouldReturnAllRestaurants() {
+        List<Restaurant> expectedRestaurants = List.of(restaurant);
+        when(restaurantRepository.findAll()).thenReturn(expectedRestaurants);
 
+        List<Restaurant> actualRestaurants = restaurantService.getAllRestaurants();
+
+        assertEquals(expectedRestaurants, actualRestaurants);
+        verify(restaurantRepository).findAll();
     }
 
     @Test
