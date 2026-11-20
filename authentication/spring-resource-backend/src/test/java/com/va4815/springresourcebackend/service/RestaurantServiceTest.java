@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,7 +95,13 @@ class RestaurantServiceTest {
 
     @Test
     public void getRestaurantById_shouldReturnNull_whenRestaurantDoesNotExist() {
+        long restaurantId = 999L;
+        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.empty());
 
+        Restaurant actualRestaurant = restaurantService.getRestaurantById(restaurantId);
+
+        assertNull(actualRestaurant);
+        verify(restaurantRepository).findById(restaurantId);
     }
 
     @Test
