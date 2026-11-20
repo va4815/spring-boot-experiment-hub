@@ -3,6 +3,7 @@ package com.va4815.springresourcebackend.service;
 import com.va4815.springresourcebackend.dto.request.CreateRestaurantRequestDTO;
 import com.va4815.springresourcebackend.entity.Restaurant;
 import com.va4815.springresourcebackend.enumeration.RestaurantType;
+import com.va4815.springresourcebackend.exception.GlobalArgumentException;
 import com.va4815.springresourcebackend.model.CurrentUser;
 import com.va4815.springresourcebackend.repository.RestaurantRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,8 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -142,6 +147,23 @@ class RestaurantServiceTest {
 
     @Test
     public void createRestaurant_shouldCreateRestaurantAlreadyExists() {
+        CreateRestaurantRequestDTO request = new CreateRestaurantRequestDTO(
+                EXISTING_RESTAURANT_NAME,
+                RestaurantType.FAST_FOOD,
+                "Test Location"
+        );
+        when(restaurantRepository.existsByName(request.name())).thenReturn(true);
+
+        GlobalArgumentException exception = assertThrows(
+                GlobalArgumentException.class,
+                () -> restaurantService.createRestaurant(request)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Restaurant with the same name already exists", exception.getMessage());
+        verify(restaurantRepository).existsByName(request.name());
+        verify(restaurantRepository, never()).save(any(Restaurant.class));
+        verifyNoInteractions(currentUser);
 
     }
 
