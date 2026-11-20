@@ -70,7 +70,13 @@ class RestaurantServiceTest {
 
     @Test
     public void getAllRestaurants_shouldReturnEmptyList() {
+        List<Restaurant> expectedRestaurants = List.of();
+        when(restaurantRepository.findAll()).thenReturn(expectedRestaurants);
 
+        List<Restaurant> actualRestaurants = restaurantService.getAllRestaurants();
+
+        assertEquals(expectedRestaurants, actualRestaurants);
+        verify(restaurantRepository).findAll();
     }
 
     @Test
