@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -81,7 +82,14 @@ class RestaurantServiceTest {
 
     @Test
     public void getRestaurantById_shouldReturnRestaurantById() {
+        long restaurantId = 1L;
+        restaurant.setId(restaurantId);
+        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
 
+        Restaurant actualRestaurant = restaurantService.getRestaurantById(restaurantId);
+
+        assertEquals(restaurant, actualRestaurant);
+        verify(restaurantRepository).findById(restaurantId);
     }
 
     @Test
