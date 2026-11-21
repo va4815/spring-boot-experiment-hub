@@ -82,6 +82,16 @@ class RestaurantControllerTest {
 
     @Test
     void getRestaurants_shouldReturnEmptyList() throws Exception {
+        when(restaurantService.getAllRestaurants()).thenReturn(List.of());
+
+        mockMvc.perform(get(BASE_URL))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        verify(restaurantService).getAllRestaurants();
+        verifyNoMoreInteractions(restaurantService);
     }
 
     // ---------- GET /restaurants/{restaurant_id} ----------
