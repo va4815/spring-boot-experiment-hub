@@ -98,6 +98,20 @@ class RestaurantControllerTest {
 
     @Test
     void getRestaurant_shouldReturnRestaurantById() throws Exception {
+        Long restaurantId = 1L;
+        Restaurant restaurant = createRestaurant(restaurantId, "Seventh Heaven", RestaurantType.FAST_FOOD, "Midgar");
+        when(restaurantService.getRestaurantById(restaurantId)).thenReturn(restaurant);
+
+        mockMvc.perform(get(BASE_URL + "/{restaurant_id}", restaurantId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.id").value(restaurantId))
+                .andExpect(jsonPath("$.name").value("Seventh Heaven"))
+                .andExpect(jsonPath("$.restaurantType").value("FAST_FOOD"))
+                .andExpect(jsonPath("$.location").value("Midgar"));
+
+        verify(restaurantService).getRestaurantById(restaurantId);
+        verifyNoMoreInteractions(restaurantService);
     }
 
     @Test
