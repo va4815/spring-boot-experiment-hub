@@ -18,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -134,6 +135,10 @@ class RestaurantControllerTest {
 
     @Test
     void getRestaurant_shouldReturnBadRequest_whenIdIsNotANumber() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/{restaurant_id}", "abc"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(restaurantService);
     }
 
     // ---------- POST /restaurants ----------
