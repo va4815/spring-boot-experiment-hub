@@ -27,7 +27,8 @@ public class RestaurantService {
     }
 
     public Restaurant getRestaurantById(Long id) {
-        return restaurantRepository.findById(id).orElse(null);
+        return restaurantRepository.findById(id)
+                .orElseThrow(() -> new GlobalArgumentException(HttpStatus.NOT_FOUND, "Restaurant not found"));
     }
 
     public Restaurant createRestaurant(CreateRestaurantRequestDTO requestDTO) {

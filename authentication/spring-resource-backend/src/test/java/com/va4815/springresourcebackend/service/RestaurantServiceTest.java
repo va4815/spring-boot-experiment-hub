@@ -21,7 +21,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -104,13 +103,17 @@ class RestaurantServiceTest {
     }
 
     @Test
-    public void getRestaurantById_shouldReturnNull_whenRestaurantDoesNotExist() {
+    public void getRestaurantById_shouldThrowNotFound_whenRestaurantDoesNotExist() {
         long restaurantId = 999L;
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.empty());
 
-        Restaurant actualRestaurant = restaurantService.getRestaurantById(restaurantId);
+        GlobalArgumentException exception = assertThrows(
+                GlobalArgumentException.class,
+                () -> restaurantService.getRestaurantById(restaurantId)
+        );
 
-        assertNull(actualRestaurant);
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertEquals("Restaurant not found", exception.getMessage());
         verify(restaurantRepository).findById(restaurantId);
     }
 

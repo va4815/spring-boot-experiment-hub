@@ -2,6 +2,7 @@ package com.va4815.springresourcebackend.controller;
 
 import com.va4815.springresourcebackend.entity.Restaurant;
 import com.va4815.springresourcebackend.enumeration.RestaurantType;
+import com.va4815.springresourcebackend.exception.GlobalArgumentException;
 import com.va4815.springresourcebackend.service.RestaurantService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OA
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.web.OAuth2ResourceServerWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -116,6 +118,18 @@ class RestaurantControllerTest {
 
     @Test
     void getRestaurant_shouldReturnError_whenRestaurantDoesNotExist() throws Exception {
+        Long restaurantId = 999L;
+        when(restaurantService.getRestaurantById(restaurantId))
+                .thenThrow(new GlobalArgumentException(HttpStatus.NOT_FOUND, "Restaurant not found"));
+
+        mockMvc.perform(get(BASE_URL + "/{restaurant_id}", restaurantId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.title").value("Restaurant not found"))
+                .andExpect(jsonPath("$.status").value("404 NOT_FOUND"));
+
+        verify(restaurantService).getRestaurantById(restaurantId);
+        verifyNoMoreInteractions(restaurantService);
     }
 
     @Test
