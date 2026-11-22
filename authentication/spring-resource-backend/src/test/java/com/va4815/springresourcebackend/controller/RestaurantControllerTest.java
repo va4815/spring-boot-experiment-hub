@@ -200,6 +200,14 @@ class RestaurantControllerTest {
 
     @Test
     void createRestaurant_shouldReturnBadRequest_whenRequestBodyIsMalformed() throws Exception {
+        String malformedJson = "{\"name\": \"Seventh Heaven\", \"restaurantType\": ";
+
+        mockMvc.perform(post(BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(malformedJson))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(restaurantService);
     }
 
 }
