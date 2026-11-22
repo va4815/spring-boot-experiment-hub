@@ -4,6 +4,7 @@ import com.va4815.springresourcebackend.dto.request.CreateRestaurantRequestDTO;
 import com.va4815.springresourcebackend.dto.response.RestaurantResponseDTO;
 import com.va4815.springresourcebackend.entity.Restaurant;
 import com.va4815.springresourcebackend.service.RestaurantService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class RestaurantController {
     }
 
     @PostMapping
-    public ResponseEntity<RestaurantResponseDTO> createRestaurant(@RequestBody CreateRestaurantRequestDTO requestDTO) {
+    public ResponseEntity<RestaurantResponseDTO> createRestaurant(@Valid @RequestBody CreateRestaurantRequestDTO requestDTO) {
 
         Restaurant createdRestaurant = restaurantService.createRestaurant(requestDTO);
         RestaurantResponseDTO response = new RestaurantResponseDTO(createdRestaurant);

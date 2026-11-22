@@ -188,6 +188,14 @@ class RestaurantControllerTest {
 
     @Test
     void createRestaurant_shouldReturnBadRequest_whenRequestBodyIsInvalid() throws Exception {
+        CreateRestaurantRequestDTO request = new CreateRestaurantRequestDTO("", null, " ");
+
+        mockMvc.perform(post(BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(restaurantService);
     }
 
     @Test
