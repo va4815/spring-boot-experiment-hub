@@ -1,5 +1,6 @@
 package com.va4815.springresourcebackend.controller;
 
+import com.va4815.springresourcebackend.dto.request.CreateRestaurantRequestDTO;
 import com.va4815.springresourcebackend.entity.Restaurant;
 import com.va4815.springresourcebackend.enumeration.RestaurantType;
 import com.va4815.springresourcebackend.exception.GlobalArgumentException;
@@ -11,6 +12,7 @@ import org.springframework.boot.security.oauth2.server.resource.autoconfigure.we
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -145,6 +148,23 @@ class RestaurantControllerTest {
 
     @Test
     void createRestaurant_shouldCreateSuccess() throws Exception {
+        CreateRestaurantRequestDTO request = new CreateRestaurantRequestDTO(
+                "Seventh Heaven", RestaurantType.FAST_FOOD, "Midgar");
+        Restaurant createdRestaurant = createRestaurant(1L, "Seventh Heaven", RestaurantType.FAST_FOOD, "Midgar");
+        when(restaurantService.createRestaurant(request)).thenReturn(createdRestaurant);
+
+        mockMvc.perform(post(BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Seventh Heaven"))
+                .andExpect(jsonPath("$.restaurantType").value("FAST_FOOD"))
+                .andExpect(jsonPath("$.location").value("Midgar"));
+
+        verify(restaurantService).createRestaurant(request);
+        verifyNoMoreInteractions(restaurantService);
     }
 
     @Test
