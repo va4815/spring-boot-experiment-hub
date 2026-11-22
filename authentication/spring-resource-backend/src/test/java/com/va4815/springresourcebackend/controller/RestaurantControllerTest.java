@@ -169,6 +169,21 @@ class RestaurantControllerTest {
 
     @Test
     void createRestaurant_shouldReturnBadRequest_whenRestaurantAlreadyExists() throws Exception {
+        CreateRestaurantRequestDTO request = new CreateRestaurantRequestDTO(
+                "Seventh Heaven", RestaurantType.FAST_FOOD, "Midgar");
+        when(restaurantService.createRestaurant(request))
+                .thenThrow(new GlobalArgumentException(HttpStatus.BAD_REQUEST, "Restaurant with the same name already exists"));
+
+        mockMvc.perform(post(BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.title").value("Restaurant with the same name already exists"))
+                .andExpect(jsonPath("$.status").value("400 BAD_REQUEST"));
+
+        verify(restaurantService).createRestaurant(request);
+        verifyNoMoreInteractions(restaurantService);
     }
 
     @Test
